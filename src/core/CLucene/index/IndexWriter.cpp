@@ -14,6 +14,7 @@
 #include "CLucene/util/Misc.h"
 #include "IndexReader.h"
 #include "IndexWriter.h"
+#include "CLucene/analysis/standard95/StandardAnalyzer.h"
 
 #include "CLucene/index/MergePolicy.h"
 #include "CLucene/search/Similarity.h"
@@ -281,6 +282,8 @@ void IndexWriter::init(Directory *d, Analyzer *a, const bool create, const bool 
         }
         if (analyzer != nullptr) {
             if (auto *sa = dynamic_cast<SimpleAnalyzer<char> *>(analyzer); sa != nullptr) {
+                docWriter = _CLNEW SDocumentsWriter<char>(directory, this);
+            } else if (auto *sa = dynamic_cast<lucene::analysis::standard95::StandardAnalyzer<char> *>(analyzer); sa != nullptr) {
                 docWriter = _CLNEW SDocumentsWriter<char>(directory, this);
             } else {
                 docWriter = _CLNEW DocumentsWriter(directory, this);
