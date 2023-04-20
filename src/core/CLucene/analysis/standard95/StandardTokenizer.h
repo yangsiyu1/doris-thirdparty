@@ -1,12 +1,14 @@
 #pragma once
 
+#include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include "CLucene/analysis/AnalysisHeader.h"
-#include "StandardTokenizerImpl.h"
 #include "CLucene/util/stringUtil.h"
+#include "StandardTokenizerImpl.h"
+#include "CLucene/_SharedHeader.h"
 
 CL_NS_USE(util)
 CL_NS_DEF2(analysis, standard95)
@@ -31,10 +33,16 @@ public:
         if (scanner_->yylength() <= maxTokenLength_) {
             scanner_->getText(term);
             if (tokenType == StandardTokenizerImpl<T>::WORD_TYPE) {
-                std::transform(term.begin(), term.end(), (char*)term.begin(),
-                               [](uint8_t c) { return to_lower(c); });
-                // to_lower((const uint8_t*)term.data(), term.size(), (uint8_t*)term.data());
+                if constexpr (std::is_same_v<T, char>) {
+                    std::transform(term.begin(), term.end(), (char*)term.begin(),
+                                   [](uint8_t c) { return to_lower(c); });
+                } else {
+                    stringCaseFold((T*)term.data(), term.size());
+                }
             }
+            // if constexpr (std::is_same_v<T, char>) {
+            //     std::cout << term << ", " << term.size() << std::endl;
+            // }
             token->set(term.data(), 0, term.size());
             return token;
         } else {
