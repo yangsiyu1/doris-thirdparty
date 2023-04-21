@@ -734,15 +734,15 @@ int32_t StandardTokenizerImpl<T>::getNextToken() {
         {
             while (true) {
                 if (zzCurrentPosL < zzEndReadL) {
-                    if constexpr (std::is_same_v<T, wchar_t>) {
-                        zzInput = Character::codePointAt(zzBufferL.data(), ZZ_BUFFERSIZE, zzCurrentPosL,
-                                                         zzEndReadL);
-                        zzCurrentPosL += Character::charCount(zzInput);
-                    } else {
+                    if constexpr (std::is_same_v<T, char>) {
                         int32_t len = Character::utf8Length(zzBufferL[zzCurrentPosL]);
                         zzInput = Character::decodeCodepoint(
                                 (const uint8_t*)&zzBufferL[zzCurrentPosL], len);
                         zzCurrentPosL += len;
+                    } else {
+                        zzInput = Character::codePointAt(zzBufferL.data(), ZZ_BUFFERSIZE,
+                                                         zzCurrentPosL, zzEndReadL);
+                        zzCurrentPosL += Character::charCount(zzInput);
                     }
                 } else if (zzAtEOF) {
                     zzInput = YYEOF;
@@ -759,15 +759,15 @@ int32_t StandardTokenizerImpl<T>::getNextToken() {
                         zzInput = YYEOF;
                         goto zzForActionBreak;
                     } else {
-                        if constexpr (std::is_same_v<T, wchar_t>) {
-                            zzInput = Character::codePointAt(zzBuffer.data(), ZZ_BUFFERSIZE,
-                                                             zzCurrentPosL, zzEndReadL);
-                            zzCurrentPosL += Character::charCount(zzInput);
-                        } else {
+                        if constexpr (std::is_same_v<T, char>) {
                             int32_t len = Character::utf8Length(zzBufferL[zzCurrentPosL]);
                             zzInput = Character::decodeCodepoint(
                                     (const uint8_t*)&zzBufferL[zzCurrentPosL], len);
                             zzCurrentPosL += len;
+                        } else {
+                            zzInput = Character::codePointAt(zzBuffer.data(), ZZ_BUFFERSIZE,
+                                                             zzCurrentPosL, zzEndReadL);
+                            zzCurrentPosL += Character::charCount(zzInput);
                         }
                     }
                 }
