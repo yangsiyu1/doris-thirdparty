@@ -36,6 +36,8 @@ public:
     }
 
     Token* next(Token* token) override {
+        skippedPositions_ = 0;
+
     label:
         int32_t tokenType = scanner_->getNextToken();
 
@@ -63,15 +65,16 @@ public:
                     }
                 }
             }
-            // if constexpr (std::is_same_v<T, char>) {
-            //     std::cout << term << ", " << term.size() << std::endl;
-            // } else {
-            //     std::wcout << term << ", " << term.size() << std::endl;
-            // }
+            if constexpr (std::is_same_v<T, char>) {
+                std::cout << term << ", " << term.size() << std::endl;
+            } else {
+                std::wcout << term << ", " << term.size() << std::endl;
+            }
             token->set(term.data(), 0, term.size());
             return token;
         } else {
             skippedPositions_++;
+            goto label;
         }
         return nullptr;
     };
