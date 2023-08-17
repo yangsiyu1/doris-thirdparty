@@ -29,6 +29,52 @@
 CL_NS_DEF(index)
 class SegmentReader;
 
+class TermDocsBuffer {
+ public:
+  TermDocsBuffer(CL_NS(store)::IndexInput* freqStream)
+      : docs_(PFOR_BLOCK_SIZE + 1),
+        freqs_(PFOR_BLOCK_SIZE + 1),
+        freqStream_(freqStream) {
+  }
+
+  ~TermDocsBuffer() {
+    cur_doc_ = 0;
+    cur_freq_ = 0;
+
+    docs_.clear();
+    freqs_.clear();
+
+    freqStream_ = nullptr;
+  }
+
+  inline int32_t getDoc() {
+    if (cur_doc_ >= size_) {
+      refill();
+    }
+    return docs_[cur_doc_++];
+  }
+
+  inline int32_t getFreq() {
+    if (cur_freq_ >= size_) {
+      refill();
+    }
+    return freqs_[cur_freq_++];
+  }
+
+  void refill();
+
+ private:
+  uint32_t size_ = 0;
+
+  uint32_t cur_doc_ = 0;
+  std::vector<uint32_t> docs_;
+
+  uint32_t cur_freq_ = 0;
+  std::vector<uint32_t> freqs_;
+
+  CL_NS(store)::IndexInput* freqStream_ = nullptr;
+};
+
 class SegmentTermDocs:public virtual TermDocs {
 protected:
   const SegmentReader* parent;
@@ -78,12 +124,16 @@ public:
 
   /** Optimized implementation. */
   virtual bool skipTo(const int32_t target);
+  virtual int32_t skipTo(const int32_t target, int32_t doc);
 
   virtual TermPositions* __asTermPositions();
 
 protected:
   virtual void skippingDoc(){}
   virtual void skipProx(const int64_t /*proxPointer*/, const int32_t /*payloadLength*/){}
+
+private:
+  TermDocsBuffer buffer_;
 };
 
 
