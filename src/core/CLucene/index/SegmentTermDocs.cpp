@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <memory>
 #include <iostream>
+#include <algorithm>
 
 #if defined(USE_AVX2) && defined(__x86_64__)
 #define  P4DEC     p4nd1dec256v32
@@ -134,6 +135,54 @@ bool SegmentTermDocs::next()  {
     }
     return true;
 }*/
+
+bool SegmentTermDocs::readDocs(DocRange* docRange) {
+    if (hasProx) {
+    } else {
+        if (count >= df) {
+            return false;
+        }
+
+        char mode = freqStream->readByte();
+        uint32_t arraySize = freqStream->readVInt();
+
+        if (mode == (char)CodeMode::kDefault) {
+            uint32_t docDelta = docRange->base_;
+            for (uint32_t i = 0; i < arraySize; i++) {
+                uint32_t docCode = freqStream->readVInt();
+                docDelta += docCode;
+                docRange->doc_many[i] = docDelta;
+            }
+            docRange->type_ = DocRangeType::kMany;
+            docRange->doc_many_size_ = arraySize;
+        } else if (mode == (char)CodeMode::kRange) {
+            uint32_t start = freqStream->readVInt();
+            start += docRange->base_;
+            docRange->type_ = DocRangeType::kRange;
+            docRange->doc_range.first = start;
+            docRange->doc_range.second = start + arraySize;
+        } else {
+            {
+                uint32_t SerializedSize = freqStream->readVInt();
+                std::vector<uint8_t> buf(SerializedSize + PFOR_BLOCK_SIZE);
+                freqStream->readBytes(buf.data(), SerializedSize);
+                P4DEC(buf.data(), arraySize, docRange->doc_many.data());
+            }
+            docRange->type_ = DocRangeType::kMany;
+            std::transform(docRange->doc_many.begin(), docRange->doc_many.end(),
+                           docRange->doc_many.begin(), [docRange](int32_t val) {
+                             return val + docRange->base_;
+                           });
+            docRange->doc_many_size_ = arraySize;
+        }
+
+        count += arraySize;
+        
+        return true;
+    }
+
+    return true;
+}
 
 int32_t SegmentTermDocs::read(int32_t *docs, int32_t *freqs, int32_t length) {
     int32_t i = 0;

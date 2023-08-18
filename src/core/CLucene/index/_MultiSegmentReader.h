@@ -151,6 +151,7 @@ public:
 
   /** Optimized implementation. */
   int32_t read(int32_t* docs, int32_t* freqs, int32_t length);
+  virtual bool readDocs(DocRange* docRange);
 
    /* A Possible future optimization could skip entire segments */
   bool skipTo(const int32_t target);

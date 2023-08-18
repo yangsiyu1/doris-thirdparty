@@ -612,6 +612,24 @@ int32_t MultiTermDocs::read(int32_t* docs, int32_t* freqs, int32_t length) {
 	}
 }
 
+bool MultiTermDocs::readDocs(DocRange* docRange) {
+	while (true) {
+		while (current == NULL) {
+			if (pointer < subReaders->length) {
+				docRange->base_ = starts[pointer];
+				current = termDocs(pointer++);
+			} else {
+				return false;
+			}
+		}
+		if (!current->readDocs(docRange)) {
+			current = nullptr;
+		} else {
+			return true;
+		}
+	}
+}
+
 bool MultiTermDocs::skipTo(const int32_t target) {
 //	do {
 //	  if (!next())

@@ -10,6 +10,8 @@
 
 #include <functional>
 
+#include "CLucene/index/DocRange.h"
+
 
 #include "Searchable.h"
 CL_CLASS_DEF(store,Directory)
@@ -36,6 +38,7 @@ CL_NS_DEF(search)
 */
 
 typedef std::function<void(const int32_t doc, const float_t score)> Functor;
+typedef std::function<void(DocRange* docRange)> DocRangeFunctor;
 
 class CLUCENE_EXPORT IndexSearcher:public Searcher{
 	CL_NS(index)::IndexReader* reader;
@@ -87,6 +90,7 @@ public:
 	void _search(Query* query, Filter* filter, HitCollector* results);
 
 	void _search(Query* query, const Functor& cb);
+	void _search(Query* query, const DocRangeFunctor& cb);
 
 	CL_NS(index)::IndexReader* getReader();
 

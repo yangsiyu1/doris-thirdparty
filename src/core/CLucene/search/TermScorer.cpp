@@ -54,6 +54,10 @@ CL_NS_DEF(search)
     return true;
   }
 
+  bool TermScorer::next2(DocRange* docRange) {
+    return termDocs->readDocs(docRange);
+  }
+
   bool TermScorer::skipTo(int32_t target) {
     // first scan in cache
     for (pointer++; pointer < pointerMax; pointer++) {

@@ -63,6 +63,7 @@ public:
 	* @throws UnsupportedOperationException
 	*/
 	int32_t read(int32_t*, int32_t*,int32_t);
+	virtual bool readDocs(DocRange* docRange) { return false; }
 
 	/**
 	* Not implemented.

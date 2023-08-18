@@ -12,6 +12,7 @@
 #include "CLucene/util/Misc.h"
 #include "CLucene/util/stringUtil.h"
 #include "CLucene/index/CodeMode.h"
+#include "CLucene/index/DocRange.h"
 
 #include "_FieldsWriter.h"
 #include "_TermInfosWriter.h"
@@ -1181,6 +1182,22 @@ void SDocumentsWriter<T>::appendPostings(ArrayBase<typename ThreadState::FieldDa
                     encode(freqOut, docDeltaBuffer, true);
                     // freq
                     encode(freqOut, freqBuffer, false);
+                } else {
+                    int32_t range1 = docDeltaBuffer.size();
+                    int32_t range2 = docDeltaBuffer[range1 - 1] - docDeltaBuffer[0] + 1;
+                    if (range1 == range2) {
+                        freqOut->writeByte((char)CodeMode::kRange);
+                        freqOut->writeVInt(docDeltaBuffer.size());
+                        freqOut->writeVInt(docDeltaBuffer[0]);
+                    } else {
+                        freqOut->writeByte((char)CodeMode::kPfor);
+                        freqOut->writeVInt(docDeltaBuffer.size());
+                        std::vector<uint8_t> compress(4 * docDeltaBuffer.size() + PFOR_BLOCK_SIZE);
+                        size_t size = P4ENC(docDeltaBuffer.data(), docDeltaBuffer.size(), compress.data());
+                        freqOut->writeVInt(size);
+                        freqOut->writeBytes(reinterpret_cast<const uint8_t*>(compress.data()), size);
+                    }
+                    docDeltaBuffer.resize(0);
                 }
 
                 skipListWriter->setSkipData(lastDoc, currentFieldStorePayloads, lastPayloadLength);
@@ -1219,10 +1236,6 @@ void SDocumentsWriter<T>::appendPostings(ArrayBase<typename ThreadState::FieldDa
                 freqBuffer.push_back(termDocFreq);
             } else {
                 docDeltaBuffer.push_back(doc);
-                if (docDeltaBuffer.size() == PFOR_BLOCK_SIZE) {
-                    freqOut->writeVInt(docDeltaBuffer.size());
-                    encode(freqOut, docDeltaBuffer, true);
-                }
             }
 
             if (!minState->nextDoc()) {
@@ -1273,6 +1286,7 @@ void SDocumentsWriter<T>::appendPostings(ArrayBase<typename ThreadState::FieldDa
                 docDeltaBuffer.resize(0);
                 freqBuffer.resize(0);
             } else {
+                freqOut->writeByte((char)CodeMode::kDefault);
                 freqOut->writeVInt(docDeltaBuffer.size());
                 uint32_t lDoc = 0;
                 for (auto& docDelta : docDeltaBuffer) {

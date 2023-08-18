@@ -26,6 +26,13 @@ void Scorer::score(HitCollector* hc) {
 	}
 }
 
+void Scorer::score2(HitCollector* hc) {
+	DocRange docRange;
+	while (next2(&docRange)) {
+		hc->collect(&docRange);
+	}
+}
+
 bool Scorer::score( HitCollector* results, const int32_t maxDoc ) {
 	while( doc() < maxDoc ) {
 		results->collect( doc(), score() );

@@ -11,6 +11,8 @@ CL_CLASS_DEF(search,Similarity)
 CL_CLASS_DEF(search,HitCollector)
 CL_CLASS_DEF(search,Explanation)
 
+#include "CLucene/index/DocRange.h"
+
 CL_NS_DEF(search)
 
 /**
@@ -48,6 +50,7 @@ public:
 	* <br>When this method is used the {@link #explain(int)} method should not be used.
 	*/
 	virtual void score(HitCollector* hc) ;
+	virtual void score2(HitCollector* hc);
 
 	/** Expert: Collects matching documents in a range.  Hook for optimization.
 	* Note that {@link #next()} must be called once before this method is called
@@ -74,6 +77,7 @@ public:
 	* @see BooleanQuery#setAllowDocsOutOfOrder
 	*/
 	virtual bool next() = 0;
+	virtual bool next2(DocRange* docRange) { return false; }
 
 	/** Returns the current document number matching the query.
 	* Initially invalid, until {@link #next()} is called the first time.
