@@ -606,11 +606,13 @@ void SDocumentsWriter<T>::ThreadState::FieldData::invertField(Field *field, Anal
         Token *token = localSToken;
         token->clear();
 
-        token->setText(stringValue, valueLength);
+        size_t newValueLength = valueLength <= 255 ? valueLength : 255;
+
+        token->setText(stringValue, newValueLength);
         token->setStartOffset(offset);
-        token->setEndOffset(offset + valueLength);
+        token->setEndOffset(offset + newValueLength);
         addPosition(token);
-        offset += valueLength;
+        offset += newValueLength;
         length++;
     } else {// tokenized field
         TokenStream *stream;
