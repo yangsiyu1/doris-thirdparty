@@ -19,8 +19,8 @@ static std::unordered_set<std::string_view> stop_words = {
 
 class StandardTokenizer : public Tokenizer {
  public:
-  StandardTokenizer(lucene::util::Reader* in, bool useStopWords)
-      : Tokenizer(in), useStopWords_(useStopWords) {
+  StandardTokenizer(lucene::util::v1::Reader* in, bool useStopWords)
+      : Tokenizer(nullptr), useStopWords_(useStopWords) {
     scanner_ = std::make_unique<StandardTokenizerImpl>(in);
   }
 
@@ -56,8 +56,7 @@ class StandardTokenizer : public Tokenizer {
     return nullptr;
   }
 
-  void reset(lucene::util::Reader* input) override {
-    Tokenizer::reset(input);
+  void reset(lucene::util::v1::Reader* input) {
     scanner_->yyreset(input);
     skippedPositions = 0;
   };

@@ -9,12 +9,12 @@ class StandardAnalyzer : public Analyzer {
   bool isSDocOpt() override { return true; }
   
   TokenStream* tokenStream(const TCHAR* fieldName,
-                           lucene::util::Reader* reader) override {
+                           lucene::util::v1::Reader* reader) override {
     return _CLNEW StandardTokenizer(reader, useStopWords_);
   }
 
   TokenStream* reusableTokenStream(const TCHAR* fieldName,
-                                   lucene::util::Reader* reader) override {
+                                   lucene::util::v1::Reader* reader) override {
     if (tokenizer_ == nullptr) {
       tokenizer_ = new StandardTokenizer(reader, useStopWords_);
     } else {

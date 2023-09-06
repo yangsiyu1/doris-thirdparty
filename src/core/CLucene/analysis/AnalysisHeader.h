@@ -10,6 +10,7 @@
 #include "CLucene/index/Payload.h"
 #include "CLucene/util/VoidList.h"
 #include "CLucene/LuceneThreads.h"
+#include "CLucene/util/v1/Reader.h"
 
 CL_CLASS_DEF(util,Reader)
 CL_CLASS_DEF(util,IReader)
@@ -283,7 +284,13 @@ public:
 	compatibility with older version.  Override to allow Analyzer to choose
 	strategy based on document and/or field.  Must be able to handle null
 	field name for backward compatibility. */
-    virtual TokenStream* tokenStream(const TCHAR* fieldName, CL_NS(util)::Reader* reader)=0;
+    virtual TokenStream* tokenStream(const TCHAR* fieldName, CL_NS(util)::Reader* reader) {
+        _CLTHROWA(CL_ERR_UnsupportedOperation, "UnsupportedOperationException Analyzer::tokenStream");
+    }
+
+    virtual TokenStream* tokenStream(const TCHAR* fieldName, lucene::util::v1::Reader* reader) {
+        _CLTHROWA(CL_ERR_UnsupportedOperation, "UnsupportedOperationException Analyzer::tokenStream");
+    }
 
     /** Creates a TokenStream that is allowed to be re-used
 	*  from the previous time that the same thread called
@@ -293,6 +300,7 @@ public:
 	*  performance.
 	*/
     virtual TokenStream* reusableTokenStream(const TCHAR* fieldName, CL_NS(util)::Reader* reader);
+    virtual TokenStream* reusableTokenStream(const TCHAR* fieldName, lucene::util::v1::Reader*  reader);
 private:
 
     DEFINE_MUTEX(THIS_LOCK)

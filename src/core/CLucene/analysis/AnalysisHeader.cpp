@@ -36,6 +36,10 @@ TokenStream* Analyzer::reusableTokenStream(const TCHAR* fieldName, CL_NS(util)::
     return tokenStream(fieldName, reader);
 }
 
+TokenStream* Analyzer::reusableTokenStream(const TCHAR* fieldName, lucene::util::v1::Reader*  reader) {
+    return tokenStream(fieldName, reader);
+}
+
 ///Compares the Token for their order
 class OrderCompare:LUCENE_BASE, public CL_NS(util)::Compare::_base //<Token*>
 {

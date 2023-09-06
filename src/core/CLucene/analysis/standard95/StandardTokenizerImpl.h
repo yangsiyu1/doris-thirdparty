@@ -8,19 +8,19 @@
 #include <vector>
 
 #include "CLucene/SharedHeader.h"
-#include "CLucene/util/CLStreams.h"
+#include "CLucene/util/v1/Reader.h"
 
 namespace lucene::analysis::standard95 {
 
 class StandardTokenizerImpl {
  public:
-  StandardTokenizerImpl(lucene::util::Reader* reader);
+  StandardTokenizerImpl(lucene::util::v1::Reader* reader);
 
   int32_t getNextToken();
   std::string_view getText();
   bool zzRefill();
   void yyclose();
-  void yyreset(lucene::util::Reader* reader);
+  void yyreset(lucene::util::v1::Reader* reader);
   inline int32_t yylength() { return zzMarkedPos - zzStartRead; }
 
  private:
@@ -70,7 +70,7 @@ class StandardTokenizerImpl {
   static constexpr int32_t EMOJI_TYPE = 7;
 
  private:
-  lucene::util::Reader* zzReader = nullptr;
+  lucene::util::v1::Reader* zzReader = nullptr;
   std::vector<char> zzBuffer;
 
   int32_t zzState = 0;

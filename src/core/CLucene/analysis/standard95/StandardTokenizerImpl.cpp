@@ -57,7 +57,7 @@ const std::vector<std::string> StandardTokenizerImpl::ZZ_ERROR_MSG = {
     "Unknown internal scanner error", "Error: could not match input",
     "Error: pushback value was too large"};
 
-StandardTokenizerImpl::StandardTokenizerImpl(lucene::util::Reader* reader)
+StandardTokenizerImpl::StandardTokenizerImpl(lucene::util::v1::Reader* reader)
     : zzBuffer(ZZ_BUFFERSIZE), zzReader(reader) {}
 
 std::string_view StandardTokenizerImpl::getText() {
@@ -83,7 +83,7 @@ bool StandardTokenizerImpl::zzRefill() {
     return true;
   }
 
-  int32_t numRead = zzReader->readCopy(zzBuffer.data(), zzEndRead, requested);
+  int32_t numRead = zzReader->read(zzBuffer.data(), zzEndRead, requested);
   if (numRead == 0) {
     _CLTHROWA(CL_ERR_Runtime,
               "Reader returned 0 characters. See JFlex examples/zero-reader "
@@ -124,7 +124,7 @@ void StandardTokenizerImpl::yyclose() {
   zzEndRead = zzStartRead;
 }
 
-void StandardTokenizerImpl::yyreset(lucene::util::Reader* reader) {
+void StandardTokenizerImpl::yyreset(lucene::util::v1::Reader* reader) {
   zzReader = reader;
   yyResetPosition();
   zzLexicalState = YYINITIAL;
